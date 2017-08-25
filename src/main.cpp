@@ -1,8 +1,9 @@
 #include "ChipPinMapping.h"
 #include <SPI.h>
-#include <SD.h>
+#include <SdFat.h>
 
 //File Stream
+SdFatSdio SD;
 File vgm;
 const unsigned int MAX_CMD_BUFFER = 32;
 char cmdBuffer[MAX_CMD_BUFFER];
@@ -36,7 +37,6 @@ const int NUMBER_OF_FILES = 8; //How many VGM files do you have stored in flash?
 int currentTrack = 1;
 
 //GD3 Data
-#define MAX_GD3_SIZE 2048
 String trackTitle;
 String gameName;
 String systemName;
@@ -121,50 +121,53 @@ void SilenceAllChannels()
   digitalWrite(YM_IC, HIGH);
 }
 
+uint32_t Read32() //Read 32 bit value from buffer
+{
+  byte v0 = GetByte();
+  byte v1 = GetByte();
+  byte v2 = GetByte();
+  byte v3 = GetByte();
+  return uint32_t(v0 + (v1 << 8) + (v2 << 16) + (v3 << 24));
+}
+
+uint32_t ReadRaw32() //Read 32 bit value straight from SD card
+{
+  byte v0 = vgm.read();
+  byte v1 = vgm.read();
+  byte v2 = vgm.read();
+  byte v3 = vgm.read();
+  return uint32_t(v0 + (v1 << 8) + (v2 << 16) + (v3 << 24));
+}
+
 uint32_t EoFOffset = 0;
 uint32_t VGMVersion = 0;
 uint32_t GD3Offset = 0;
 void GetHeaderData() //Scrape off the important VGM data from the header, then drop down to the GD3 area for song info data
 {
-  for(int i = bufferPos; i<0x03; i++)GetByte(); //V - G - M
-  for ( int i = bufferPos; i < 0x07; i++ ) //0x04->0x07 EoF Offset
-  {
-    EoFOffset += uint32_t(GetByte()) << ( 8 * i );
-  }
-  for ( int i = bufferPos; i < 0x0B; i++ ) //0x08->0x0B VGM Version
-  {
-    VGMVersion += uint32_t(GetByte()) << ( 8 * i );
-  }
-  for(int i = bufferPos; i<0x13; i++)GetByte(); //Skip 0x0C->0x13
-  for ( int i = bufferPos; i < 0x17; i++ ) //0x14->0x17 GD3 Data Offset
-  {
-      GD3Offset += uint32_t(GetByte()) << ( 8 * i );
-  }
-  // Serial.print("GD3 OFFSET: ");
-  // Serial.println(GD3Offset);
+  Read32(); //V - G - M 0x00->0x03
+  EoFOffset = Read32(); //End of File offset 0x04->0x07
+  VGMVersion = Read32(); //VGM Version 0x08->0x0B
+  for(int i = 0x0C; i<0x14; i++)GetByte(); //Skip 0x0C->0x14
+  GD3Offset = Read32(); //GD3 (song info) data offset 0x14->0x17
+
   uint32_t bufferReturnPosition = vgm.position();
   vgm.seek(0);
-  vgm.seek(GD3Offset+0x14);
-  // Serial.print("GD3 POSITION: ");
-  // Serial.println(vgm.position());
+  vgm.seekCur(GD3Offset+0x14);
   uint32_t GD3Position = 0x00;
-  for(GD3Position; GD3Position<0x03; GD3Position++){ vgm.read(); } //G - D - 3
-  for(GD3Position; GD3Position<0x07; GD3Position++){ vgm.read(); }//Version data
-  uint32_t dataLength = 0;
-  for (int i = GD3Position; i < GD3Position+4; i++ ) //Get size of data payload
-  {
-    dataLength += uint32_t(vgm.read()) << ( 8 * i );
-  }
+  ReadRaw32(); GD3Position+=4;  //G - D - 3
+  ReadRaw32(); GD3Position+=4;  //Version data
+  uint32_t dataLength = ReadRaw32(); //Get size of data payload
   GD3Position+=4;
-  char rawGD3String[MAX_GD3_SIZE];
+
+  String rawGD3String;
   // Serial.print("DATA LENGTH: ");
   // Serial.println(dataLength);
   if(dataLength < MAX_GD3_SIZE)
   {
     for(int i = 0; i<dataLength; i++) //Convert 16-bit characters to 8 bit chars. This may cause issues with non ASCII characters. (IE Japanese chars.)
     {
+      rawGD3String += char(vgm.read());
       vgm.read();
-      rawGD3String[i] = vgm.read();
     }
     GD3Position = 0;
 
@@ -212,21 +215,19 @@ void GetHeaderData() //Scrape off the important VGM data from the header, then d
     Serial.println(systemName);
     Serial.println(gameDate);
   }
+  vgm.seek(bufferReturnPosition); //Send the file seek back to the original buffer position so we don't confuse our program.
+  waitSamples = Read32(); //0x18->0x1B : Get wait Samples count
+  loopOffset = Read32();  //0x1C->0x1F : Get loop offset Postition
+  for(int i = 0; i<5; i++) Read32(); //Skip right to the VGM data offset position;
+  uint32_t vgmDataOffset = Read32();
+  if(vgmDataOffset == 0 || vgmDataOffset == 12) //VGM starts at standard 0x40
+  {
+    Read32(); Read32();
+  }
   else
   {
-    Serial.println("GD3 data too large!");
+    for(int i = 0; i < vgmDataOffset; i++) GetByte();  //VGM starts at different data position (Probably VGM spec 1.7+)
   }
-  vgm.seek(bufferReturnPosition); //Send the file seek back to the original buffer position so we don't confuse our program.
-  for(int i = bufferPos; i<0x17; i++) GetByte(); //Ignore the remaining unimportant VGM header data
-  for ( int i = bufferPos; i < 0x1B; i++ ) //0x18->0x1B : Get wait Samples count
-  {
-    waitSamples += uint32_t(GetByte()) << ( 8 * i );
-  }
-  for ( int i = bufferPos; i < 0x1F; i++ ) //0x1C->0x1F : Get loop offset Postition
-  {
-    loopOffset += uint32_t(GetByte()) << ( 8 * i );
-  }
-  for ( int i = bufferPos; i < 0x40; i++ ) GetByte(); //Go to VGM data start
 }
 
 void StartupSequence()
@@ -295,11 +296,12 @@ void setup()
   pinMode(YM_A1, OUTPUT);
   Serial.begin(115200);
   SilenceAllChannels();
-  if(!SD.begin(BUILTIN_SDCARD))
+  if(!SD.begin())
   {
       Serial.println("Card Mount Failed");
       return;
   }
+  delay(1500);
   StartupSequence();
 }
 
@@ -330,7 +332,6 @@ void loop()
       digitalWrite(YM_A0, LOW);
       digitalWrite(YM_CS, LOW);
       //Areas like this may require 1 microsecond delays.
-      delayMicroseconds(1);
       SendYMByte(address);
       digitalWrite(YM_WR, LOW);
       delayMicroseconds(1);
@@ -357,7 +358,6 @@ void loop()
       digitalWrite(YM_A1, HIGH);
       digitalWrite(YM_A0, LOW);
       digitalWrite(YM_CS, LOW);
-      delayMicroseconds(1);
       SendYMByte(address);
       digitalWrite(YM_WR, LOW);
       delayMicroseconds(1);
