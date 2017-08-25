@@ -162,59 +162,58 @@ void GetHeaderData() //Scrape off the important VGM data from the header, then d
   String rawGD3String;
   // Serial.print("DATA LENGTH: ");
   // Serial.println(dataLength);
-  if(dataLength < MAX_GD3_SIZE)
-  {
-    for(int i = 0; i<dataLength; i++) //Convert 16-bit characters to 8 bit chars. This may cause issues with non ASCII characters. (IE Japanese chars.)
-    {
-      rawGD3String += char(vgm.read());
-      vgm.read();
-    }
-    GD3Position = 0;
 
-    while(rawGD3String[GD3Position] != 0) //Parse out the track title.
-    {
-      trackTitle += rawGD3String[GD3Position];
-      GD3Position++;
-    }
-    GD3Position++;
-    while(rawGD3String[GD3Position] != 0) GD3Position++; //Skip Japanese track title.
-    GD3Position++;
-    while(rawGD3String[GD3Position] != 0) //Parse out the game name.
-    {
-      gameName += rawGD3String[GD3Position];
-      GD3Position++;
-    }
-    GD3Position++;
-    while(rawGD3String[GD3Position] != 0) GD3Position++;//Skip Japanese game name.
-    GD3Position++;
-    while(rawGD3String[GD3Position] != 0) //Parse out the system name.
-    {
-      systemName += rawGD3String[GD3Position];
-      GD3Position++;
-    }
-    GD3Position++;
-    while(rawGD3String[GD3Position] != 0) GD3Position++;//Skip Japanese system name.
-    GD3Position++;
-    while(rawGD3String[GD3Position] != 0) GD3Position++;//Skip English authors
-    GD3Position++;
-    // while(rawGD3String[GD3Position] != 0) //Parse out the music authors (I skipped this since it sometimes produces a ton of data! Uncomment this, comment skip, add vars if you want this.)
-    // {
-    //   musicAuthors += rawGD3String[GD3Position];
-    //   GD3Position++;
-    // }
-    while(rawGD3String[GD3Position] != 0) GD3Position++;//Skip Japanese authors.
-    GD3Position++;
-    while(rawGD3String[GD3Position] != 0) //Parse out the game date
-    {
-      gameDate += rawGD3String[GD3Position];
-      GD3Position++;
-    }
-    GD3Position++;
-    Serial.println(trackTitle);
-    Serial.println(gameName);
-    Serial.println(systemName);
-    Serial.println(gameDate);
+  for(int i = 0; i<dataLength; i++) //Convert 16-bit characters to 8 bit chars. This may cause issues with non ASCII characters. (IE Japanese chars.)
+  {
+    rawGD3String += char(vgm.read());
+    vgm.read();
   }
+  GD3Position = 0;
+
+  while(rawGD3String[GD3Position] != 0) //Parse out the track title.
+  {
+    trackTitle += rawGD3String[GD3Position];
+    GD3Position++;
+  }
+  GD3Position++;
+  while(rawGD3String[GD3Position] != 0) GD3Position++; //Skip Japanese track title.
+  GD3Position++;
+  while(rawGD3String[GD3Position] != 0) //Parse out the game name.
+  {
+    gameName += rawGD3String[GD3Position];
+    GD3Position++;
+  }
+  GD3Position++;
+  while(rawGD3String[GD3Position] != 0) GD3Position++;//Skip Japanese game name.
+  GD3Position++;
+  while(rawGD3String[GD3Position] != 0) //Parse out the system name.
+  {
+    systemName += rawGD3String[GD3Position];
+    GD3Position++;
+  }
+  GD3Position++;
+  while(rawGD3String[GD3Position] != 0) GD3Position++;//Skip Japanese system name.
+  GD3Position++;
+  while(rawGD3String[GD3Position] != 0) GD3Position++;//Skip English authors
+  GD3Position++;
+  // while(rawGD3String[GD3Position] != 0) //Parse out the music authors (I skipped this since it sometimes produces a ton of data! Uncomment this, comment skip, add vars if you want this.)
+  // {
+  //   musicAuthors += rawGD3String[GD3Position];
+  //   GD3Position++;
+  // }
+  while(rawGD3String[GD3Position] != 0) GD3Position++;//Skip Japanese authors.
+  GD3Position++;
+  while(rawGD3String[GD3Position] != 0) //Parse out the game date
+  {
+    gameDate += rawGD3String[GD3Position];
+    GD3Position++;
+  }
+  GD3Position++;
+  Serial.println(trackTitle);
+  Serial.println(gameName);
+  Serial.println(systemName);
+  Serial.println(gameDate);
+
   vgm.seek(bufferReturnPosition); //Send the file seek back to the original buffer position so we don't confuse our program.
   waitSamples = Read32(); //0x18->0x1B : Get wait Samples count
   loopOffset = Read32();  //0x1C->0x1F : Get loop offset Postition
