@@ -8,6 +8,10 @@ File vgm;
 const unsigned int MAX_CMD_BUFFER = 32;
 char cmdBuffer[MAX_CMD_BUFFER];
 uint32_t bufferPos = 0;
+const unsigned int MAX_FILE_NAME_SIZE = 1024;
+char fileName[MAX_FILE_NAME_SIZE];
+uint16_t numberOfFiles = 0;
+int32_t currentFileNumber = 0;
 
 //Timing Variables
 float singleSampleWait = 0;
@@ -33,7 +37,6 @@ uint16_t nextSongAfterXLoops = 3;
 bool play = true;
 
 //SONG INFO
-const int NUMBER_OF_FILES = 8; //How many VGM files do you have stored in flash? (Files should be named (1.vgm, 2.vgm, 3.vgm, etc);
 int currentTrack = 1;
 
 //GD3 Data
@@ -100,6 +103,12 @@ void ClearBuffers()
     cmdBuffer[i] = 0;
   for(int i = 0; i < MAX_PCM_BUFFER_SIZE; i++)
     pcmBuffer[i] = 0;
+  for(int i = 0; i < MAX_FILE_NAME_SIZE; i++)
+    fileName[i] = 0;
+  trackTitle = "";
+  gameName = "";
+  systemName = "";
+  gameDate = "";
 }
 
 void SilenceAllChannels()
@@ -213,7 +222,7 @@ void GetHeaderData() //Scrape off the important VGM data from the header, then d
   Serial.println(gameName);
   Serial.println(systemName);
   Serial.println(gameDate);
-
+  Serial.println("");
   vgm.seek(bufferReturnPosition); //Send the file seek back to the original buffer position so we don't confuse our program.
   waitSamples = Read32(); //0x18->0x1B : Get wait Samples count
   loopOffset = Read32();  //0x1C->0x1F : Get loop offset Postition
@@ -229,7 +238,25 @@ void GetHeaderData() //Scrape off the important VGM data from the header, then d
   }
 }
 
-void StartupSequence()
+void RemoveSVI() //Sometimes, Windows likes to place invisible files in our SD card without asking... GTFO!
+{
+  File nextFile;
+  nextFile.openNext(SD.vwd(), O_READ);
+  char name[MAX_FILE_NAME_SIZE];
+  nextFile.getName(name, MAX_FILE_NAME_SIZE);
+  String n = String(name);
+  if(n == "System Volume Information")
+  {
+      if(!nextFile.rmRfStar())
+        Serial.println("Failed to remove SVI file");
+      // nextFile.openNext(SD.vwd(), O_READ);
+      // nextFile.getName(name, MAX_FILE_NAME_SIZE);
+  }
+  SD.vwd()->rewind();
+  nextFile.close();
+}
+enum StartUpProfile {FIRST_START, NEXT, PREVIOUS, RNG};
+void StartupSequence(StartUpProfile sup)
 {
   waitSamples = 0;
   loopOffset = 0;
@@ -240,7 +267,89 @@ void StartupSequence()
   loopCount = 0;
   cmd = 0;
   ClearBuffers();
-  vgm = SD.open("test.vgm", FILE_READ);
+  File nextFile;
+  switch(sup)
+  {
+    case FIRST_START:
+    {
+      nextFile.openNext(SD.vwd(), O_READ);
+      nextFile.getName(fileName, MAX_FILE_NAME_SIZE);
+      nextFile.close();
+      currentFileNumber = 0;
+    }
+    break;
+    case NEXT:
+    {
+      if(currentFileNumber+1 >= numberOfFiles)
+      {
+          SD.vwd()->rewind();
+          currentFileNumber = 0;
+      }
+      else
+          currentFileNumber++;
+      nextFile.openNext(SD.vwd(), O_READ);
+      nextFile.getName(fileName, MAX_FILE_NAME_SIZE);
+      nextFile.close();
+    }
+    break;
+    case PREVIOUS:
+    {
+      if(currentFileNumber != 0)
+      {
+        currentFileNumber--;
+        SD.vwd()->rewind();
+        for(int i = 0; i<=currentFileNumber; i++)
+        {
+          nextFile.close();
+          nextFile.openNext(SD.vwd(), O_READ);
+        }
+        nextFile.getName(fileName, MAX_FILE_NAME_SIZE);
+        nextFile.close();
+      }
+      else
+      {
+        currentFileNumber = numberOfFiles-1;
+        SD.vwd()->rewind();
+        for(int i = 0; i<=currentFileNumber; i++)
+        {
+          nextFile.close();
+          nextFile.openNext(SD.vwd(), O_READ);
+        }
+        nextFile.getName(fileName, MAX_FILE_NAME_SIZE);
+        nextFile.close();
+      }
+    }
+    break;
+    case RNG:
+    {
+      randomSeed(micros());
+      uint16_t randomFile;
+      while(randomFile == currentFileNumber)
+        randomFile = random(numberOfFiles);
+      currentFileNumber = randomFile;
+      SD.vwd()->rewind();
+      nextFile.openNext(SD.vwd(), O_READ);
+      if(randomFile == 0)
+      {
+          nextFile.openNext(SD.vwd(), O_READ);
+      }
+      else
+      {
+        for(int i = 0; i<randomFile; i++)
+        {
+          nextFile.close();
+          nextFile.openNext(SD.vwd(), O_READ);
+        }
+      }
+      nextFile.getName(fileName, MAX_FILE_NAME_SIZE);
+      nextFile.close();
+    }
+    break;
+  }
+  Serial.print("Current file number: "); Serial.print(currentFileNumber+1); Serial.print("/"); Serial.println(numberOfFiles);
+  if(vgm.isOpen())
+    vgm.close();
+  vgm = SD.open(fileName, FILE_READ);
   if(!vgm)
     Serial.println("File open failed!");
   else
@@ -300,12 +409,38 @@ void setup()
       Serial.println("Card Mount Failed");
       return;
   }
+  RemoveSVI();
+  File countFile;
+  while ( countFile.openNext( SD.vwd(), O_READ ))
+  {
+    countFile.close();
+    numberOfFiles++;
+  }
+  countFile.close();
+  SD.vwd()->rewind();
   delay(1500);
-  StartupSequence();
+  StartupSequence(FIRST_START);
 }
 
 void loop()
 {
+
+  while(Serial.available())
+  {
+    switch(Serial.read())
+    {
+      case '+':
+        StartupSequence(NEXT);
+      break;
+      case '-':
+        StartupSequence(PREVIOUS);
+      break;
+      case '*':
+        StartupSequence(RNG);
+      break;
+    }
+  }
+
   if(!play)
     return;
   unsigned long timeInMicros = micros();
