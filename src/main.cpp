@@ -1,6 +1,11 @@
 #include "ChipPinMapping.h"
 #include <SPI.h>
 #include <SdFat.h>
+#include <Wire.h>
+#include <U8g2lib.h>
+
+//OLED
+U8G2_SH1106_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, 19, 18, U8X8_PIN_NONE);
 
 //File Stream
 SdFatSdio SD;
@@ -35,7 +40,7 @@ uint32_t loopOffset = 0;
 uint16_t loopCount = 0;
 uint16_t nextSongAfterXLoops = 3;
 enum PlayMode {LOOP, PAUSE, SHUFFLE, IN_ORDER};
-PlayMode playMode = IN_ORDER;
+PlayMode playMode = SHUFFLE;
 
 //GD3 Data
 String trackTitle;
@@ -247,12 +252,45 @@ void RemoveSVI() //Sometimes, Windows likes to place invisible files in our SD c
   {
       if(!nextFile.rmRfStar())
         Serial.println("Failed to remove SVI file");
-      // nextFile.openNext(SD.vwd(), O_READ);
-      // nextFile.getName(name, MAX_FILE_NAME_SIZE);
   }
   SD.vwd()->rewind();
   nextFile.close();
 }
+
+void DrawOledPage()
+{
+  u8g2.clearDisplay();
+  u8g2.setFont(u8g2_font_helvR08_te);
+  u8g2.sendBuffer();
+  char *cstr = &trackTitle[0u];
+  u8g2.drawStr(0,10, cstr);
+  cstr = &gameName[0u];
+  u8g2.drawStr(0,20, cstr);
+  cstr = &gameDate[0u];
+  u8g2.drawStr(0,30, cstr);
+  cstr = &systemName[0u];
+  u8g2.drawStr(0,40, cstr);
+  String fileNumberData = "File: " + String(currentFileNumber+1) + "/" + String(numberOfFiles);
+  cstr = &fileNumberData[0u];
+  u8g2.drawStr(0,50, cstr);
+  String loopStatus;
+  if(playMode == LOOP)
+    loopStatus = "LOOP ON";
+  else
+    loopStatus = "LOOP OFF";
+  cstr = &loopStatus[0u];
+  u8g2.drawStr(0,60, cstr);
+
+  String shuffleStatus;
+  if(playMode == SHUFFLE)
+    shuffleStatus = "SHFL ON";
+  else
+    shuffleStatus = "SHFL OFF";
+  cstr = &shuffleStatus[0u];
+  u8g2.drawStr(60, 60, cstr);
+  u8g2.sendBuffer();
+}
+
 enum StartUpProfile {FIRST_START, NEXT, PREVIOUS, RNG};
 void StartupSequence(StartUpProfile sup)
 {
@@ -367,6 +405,7 @@ void StartupSequence(StartUpProfile sup)
 
     SilenceAllChannels();
     digitalWrite(SN_WE, HIGH);
+    DrawOledPage();
     delay(500);
 }
 
@@ -411,6 +450,17 @@ void setup()
   }
   countFile.close();
   SD.vwd()->rewind();
+  u8g2.begin();
+  u8g2.firstPage();
+  u8g2.setFont(u8g2_font_helvB08_tr);
+  u8g2.drawStr(30,10,"Aidan Lawrence");
+  u8g2.drawStr(50,20,"2017");
+  u8g2.drawStr(30,50,"Sega Genesis");
+  u8g2.drawStr(10,60,"Hardware VGM Player");
+  u8g2.sendBuffer();
+  delay(1500);
+  u8g2.clearDisplay();
+  u8g2.sendBuffer();
   StartupSequence(FIRST_START);
 }
 
@@ -433,10 +483,12 @@ void loop()
       case '/': //Toggle shuffle mode
       playMode == SHUFFLE ? playMode = IN_ORDER : playMode = SHUFFLE;
       playMode == SHUFFLE ? Serial.println("SHUFFLE ON") : Serial.println("SHUFFLE OFF");
+      DrawOledPage();
       break;
       case '.': //Toggle loop mode
       playMode == LOOP ? playMode = IN_ORDER : playMode = LOOP;
       playMode == LOOP ? Serial.println("LOOP ON") : Serial.println("LOOP OFF");
+      DrawOledPage();
       break;
     }
   }
