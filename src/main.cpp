@@ -273,21 +273,20 @@ void DrawOledPage()
   String fileNumberData = "File: " + String(currentFileNumber+1) + "/" + String(numberOfFiles);
   cstr = &fileNumberData[0u];
   u8g2.drawStr(0,50, cstr);
+  String loopShuffleStatus;
   String loopStatus;
   if(playMode == LOOP)
     loopStatus = "LOOP ON";
   else
     loopStatus = "LOOP OFF";
-  cstr = &loopStatus[0u];
-  u8g2.drawStr(0,60, cstr);
-
   String shuffleStatus;
   if(playMode == SHUFFLE)
     shuffleStatus = "SHFL ON";
   else
     shuffleStatus = "SHFL OFF";
-  cstr = &shuffleStatus[0u];
-  u8g2.drawStr(60, 60, cstr);
+  loopShuffleStatus = loopStatus + " | " + shuffleStatus;
+  cstr = &loopShuffleStatus[0u];
+  u8g2.drawStr(0, 60, cstr);
   u8g2.sendBuffer();
 }
 
