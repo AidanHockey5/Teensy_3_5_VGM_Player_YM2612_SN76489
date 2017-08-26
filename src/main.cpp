@@ -34,10 +34,8 @@ uint8_t cmd;
 uint32_t loopOffset = 0;
 uint16_t loopCount = 0;
 uint16_t nextSongAfterXLoops = 3;
-bool play = true;
-
-//SONG INFO
-int currentTrack = 1;
+enum PlayMode {LOOP, PAUSE, SHUFFLE, IN_ORDER};
+PlayMode playMode = IN_ORDER;
 
 //GD3 Data
 String trackTitle;
@@ -323,17 +321,12 @@ void StartupSequence(StartUpProfile sup)
     case RNG:
     {
       randomSeed(micros());
-      uint16_t randomFile;
+      uint16_t randomFile = currentFileNumber;
       while(randomFile == currentFileNumber)
-        randomFile = random(numberOfFiles);
+        randomFile = random(numberOfFiles-1);
       currentFileNumber = randomFile;
       SD.vwd()->rewind();
       nextFile.openNext(SD.vwd(), O_READ);
-      if(randomFile == 0)
-      {
-          nextFile.openNext(SD.vwd(), O_READ);
-      }
-      else
       {
         for(int i = 0; i<randomFile; i++)
         {
@@ -368,7 +361,7 @@ void StartupSequence(StartUpProfile sup)
       else
       {
         preCalced8nDelays[i] = ((1000.0 / (sampleRate/(float)i))*1000);
-        preCalced7nDelays[i] = ((1000.0 / (sampleRate/(float)i+1))*1000);  //+1 is spec-accurate; however, on this hardware, it sounds better without it.
+        preCalced7nDelays[i] = ((1000.0 / (sampleRate/(float)i+1))*1000);
       }
     }
 
@@ -418,7 +411,6 @@ void setup()
   }
   countFile.close();
   SD.vwd()->rewind();
-  delay(1500);
   StartupSequence(FIRST_START);
 }
 
@@ -429,19 +421,33 @@ void loop()
   {
     switch(Serial.read())
     {
-      case '+':
+      case '+': //Next song
         StartupSequence(NEXT);
       break;
-      case '-':
+      case '-': //Previous Song
         StartupSequence(PREVIOUS);
       break;
-      case '*':
+      case '*': //Pick random song
         StartupSequence(RNG);
+      break;
+      case '/': //Toggle shuffle mode
+      playMode == SHUFFLE ? playMode = IN_ORDER : playMode = SHUFFLE;
+      playMode == SHUFFLE ? Serial.println("SHUFFLE ON") : Serial.println("SHUFFLE OFF");
+      break;
+      case '.': //Toggle loop mode
+      playMode == LOOP ? playMode = IN_ORDER : playMode = LOOP;
+      playMode == LOOP ? Serial.println("LOOP ON") : Serial.println("LOOP OFF");
       break;
     }
   }
-
-  if(!play)
+  if(loopCount >= nextSongAfterXLoops)
+  {
+    if(playMode == SHUFFLE)
+      StartupSequence(RNG);
+    if(playMode == IN_ORDER)
+      StartupSequence(NEXT);
+  }
+  if(playMode == PAUSE)
     return;
   unsigned long timeInMicros = micros();
   if( timeInMicros - startTime <= pauseTime)
