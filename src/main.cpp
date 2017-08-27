@@ -181,45 +181,50 @@ void GetHeaderData() //Scrape off the important VGM data from the header, then d
 
   for(int i = 0; i<dataLength; i++) //Convert 16-bit characters to 8 bit chars. This may cause issues with non ASCII characters. (IE Japanese chars.)
   {
-    rawGD3String += char(vgm.read());
-    vgm.read();
+    char c1 = vgm.read();
+    char c2 = vgm.read();
+    if(c1 == 0 && c2 == 0)
+      rawGD3String += '\n';
+    else
+      rawGD3String += char(c1);
   }
   GD3Position = 0;
 
-  while(rawGD3String[GD3Position] != 0) //Parse out the track title.
+  while(rawGD3String[GD3Position] != '\n') //Parse out the track title.
   {
     trackTitle += rawGD3String[GD3Position];
     GD3Position++;
   }
   GD3Position++;
-  while(rawGD3String[GD3Position] != 0) GD3Position++; //Skip Japanese track title.
+
+  while(rawGD3String[GD3Position] != '\n') GD3Position++; //Skip Japanese track title.
   GD3Position++;
-  while(rawGD3String[GD3Position] != 0) //Parse out the game name.
+  while(rawGD3String[GD3Position] != '\n') //Parse out the game name.
   {
     gameName += rawGD3String[GD3Position];
     GD3Position++;
   }
   GD3Position++;
-  while(rawGD3String[GD3Position] != 0) GD3Position++;//Skip Japanese game name.
+  while(rawGD3String[GD3Position] != '\n') GD3Position++;//Skip Japanese game name.
   GD3Position++;
-  while(rawGD3String[GD3Position] != 0) //Parse out the system name.
+  while(rawGD3String[GD3Position] != '\n') //Parse out the system name.
   {
     systemName += rawGD3String[GD3Position];
     GD3Position++;
   }
   GD3Position++;
-  while(rawGD3String[GD3Position] != 0) GD3Position++;//Skip Japanese system name.
+  while(rawGD3String[GD3Position] != '\n') GD3Position++;//Skip Japanese system name.
   GD3Position++;
-  while(rawGD3String[GD3Position] != 0) GD3Position++;//Skip English authors
+  while(rawGD3String[GD3Position] != '\n') GD3Position++;//Skip English authors
   GD3Position++;
   // while(rawGD3String[GD3Position] != 0) //Parse out the music authors (I skipped this since it sometimes produces a ton of data! Uncomment this, comment skip, add vars if you want this.)
   // {
   //   musicAuthors += rawGD3String[GD3Position];
   //   GD3Position++;
   // }
-  while(rawGD3String[GD3Position] != 0) GD3Position++;//Skip Japanese authors.
+  while(rawGD3String[GD3Position] != '\n') GD3Position++;//Skip Japanese authors.
   GD3Position++;
-  while(rawGD3String[GD3Position] != 0) //Parse out the game date
+  while(rawGD3String[GD3Position] != '\n') //Parse out the game date
   {
     gameDate += rawGD3String[GD3Position];
     GD3Position++;
