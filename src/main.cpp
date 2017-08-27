@@ -32,7 +32,7 @@ unsigned long pauseTime = 0;
 unsigned long startTime = 0;
 
 //Song Data Variables
-#define MAX_PCM_BUFFER_SIZE 64000 //In bytes
+#define MAX_PCM_BUFFER_SIZE 102400 //In bytes
 uint8_t pcmBuffer[MAX_PCM_BUFFER_SIZE];
 uint32_t pcmBufferPosition = 0;
 uint8_t cmd;
@@ -106,6 +106,10 @@ void ClearBuffers()
     cmdBuffer[i] = 0;
   for(int i = 0; i < MAX_PCM_BUFFER_SIZE; i++)
     pcmBuffer[i] = 0;
+}
+
+void ClearTrackData()
+{
   for(int i = 0; i < MAX_FILE_NAME_SIZE; i++)
     fileName[i] = 0;
   trackTitle = "";
@@ -290,19 +294,11 @@ void DrawOledPage()
   u8g2.sendBuffer();
 }
 
-enum StartUpProfile {FIRST_START, NEXT, PREVIOUS, RNG};
-void StartupSequence(StartUpProfile sup)
+enum StartUpProfile {FIRST_START, NEXT, PREVIOUS, RNG, REQUEST};
+void StartupSequence(StartUpProfile sup, String request = "")
 {
-  waitSamples = 0;
-  loopOffset = 0;
-  lastWaitData61 = 0;
-  cachedWaitTime61 = 0;
-  pauseTime = 0;
-  startTime = 0;
-  loopCount = 0;
-  cmd = 0;
-  ClearBuffers();
   File nextFile;
+  ClearTrackData();
   switch(sup)
   {
     case FIRST_START:
@@ -375,7 +371,47 @@ void StartupSequence(StartUpProfile sup)
       nextFile.close();
     }
     break;
+    case REQUEST:
+    {
+      SD.vwd()->rewind();
+      bool fileFound = false;
+      Serial.print("REQUEST: ");Serial.println(request);
+      for(int i = 0; i<numberOfFiles; i++)
+      {
+        nextFile.close();
+        nextFile.openNext(SD.vwd(), O_READ);
+        nextFile.getName(fileName, MAX_FILE_NAME_SIZE);
+        String tmpFN = String(fileName);
+        tmpFN.trim();
+        if(tmpFN == request.trim())
+        {
+          currentFileNumber = i;
+          fileFound = true;
+          break;
+        }
+      }
+      nextFile.close();
+      if(fileFound)
+      {
+        Serial.println("File found!");
+      }
+      else
+      {
+        Serial.println("ERROR: File not found! Continuing with current song.");
+        return;
+      }
+    }
+    break;
   }
+  waitSamples = 0;
+  loopOffset = 0;
+  lastWaitData61 = 0;
+  cachedWaitTime61 = 0;
+  pauseTime = 0;
+  startTime = 0;
+  loopCount = 0;
+  cmd = 0;
+  ClearBuffers();
   Serial.print("Current file number: "); Serial.print(currentFileNumber+1); Serial.print("/"); Serial.println(numberOfFiles);
   if(vgm.isOpen())
     vgm.close();
@@ -465,7 +501,6 @@ void setup()
 
 void loop()
 {
-
   while(Serial.available())
   {
     switch(Serial.read())
@@ -480,14 +515,19 @@ void loop()
         StartupSequence(RNG);
       break;
       case '/': //Toggle shuffle mode
-      playMode == SHUFFLE ? playMode = IN_ORDER : playMode = SHUFFLE;
-      playMode == SHUFFLE ? Serial.println("SHUFFLE ON") : Serial.println("SHUFFLE OFF");
-      DrawOledPage();
+        playMode == SHUFFLE ? playMode = IN_ORDER : playMode = SHUFFLE;
+        playMode == SHUFFLE ? Serial.println("SHUFFLE ON") : Serial.println("SHUFFLE OFF");
+        DrawOledPage();
       break;
       case '.': //Toggle loop mode
-      playMode == LOOP ? playMode = IN_ORDER : playMode = LOOP;
-      playMode == LOOP ? Serial.println("LOOP ON") : Serial.println("LOOP OFF");
-      DrawOledPage();
+        playMode == LOOP ? playMode = IN_ORDER : playMode = LOOP;
+        playMode == LOOP ? Serial.println("LOOP ON") : Serial.println("LOOP OFF");
+        DrawOledPage();
+      break;
+      case 'r': //Song Request, format:  r:mySongFileName.vgm - An attempt will be made to find and open that file.
+        String req = Serial.readString(1024);
+        req.remove(0, 1); //Remove colon character
+        StartupSequence(REQUEST, req);
       break;
     }
   }
