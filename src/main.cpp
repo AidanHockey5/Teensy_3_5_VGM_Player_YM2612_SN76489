@@ -86,7 +86,7 @@ void SendSNByte(byte b)
     digitalWrite(SN_DATA[i], ((b >> i)&1));
   }
   digitalWrite(SN_WE, LOW);
-  delayMicroseconds(15);
+  delayMicroseconds(13);
   digitalWrite(SN_WE, HIGH);
 }
 
@@ -466,6 +466,11 @@ void setup()
     pinMode(SN_DATA[i], OUTPUT);
   }
 
+  //Button Setup
+  pinMode(FWD_BTN, INPUT_PULLUP);
+  pinMode(RNG_BTN, INPUT_PULLUP);
+  pinMode(PRV_BTN, INPUT_PULLUP);
+
   //Sound chip control pins
   pinMode(SN_WE, OUTPUT);
   pinMode(YM_IC, OUTPUT);
@@ -536,6 +541,15 @@ void loop()
       break;
     }
   }
+
+  if(!digitalRead(FWD_BTN))
+    StartupSequence(NEXT);
+  if(!digitalRead(PRV_BTN))
+    StartupSequence(PREVIOUS);
+  if(!digitalRead(RNG_BTN))
+    StartupSequence(RNG);
+
+
   if(loopCount >= nextSongAfterXLoops)
   {
     if(playMode == SHUFFLE)
@@ -557,7 +571,6 @@ void loop()
       SendSNByte(GetByte());
       startTime = timeInMicros;
       pauseTime = singleSampleWait;
-      //delay(singleSampleWait);
       break;
 
       case 0x52:
@@ -570,15 +583,15 @@ void loop()
       //Areas like this may require 1 microsecond delays.
       SendYMByte(address);
       digitalWrite(YM_WR, LOW);
-      delayMicroseconds(1);
+      //delayMicroseconds(1);
       digitalWrite(YM_WR, HIGH);
       digitalWrite(YM_CS, HIGH);
-      delayMicroseconds(1);
+      //delayMicroseconds(1);
       digitalWrite(YM_A0, HIGH);
       digitalWrite(YM_CS, LOW);
       SendYMByte(data);
       digitalWrite(YM_WR, LOW);
-      delayMicroseconds(1);
+      //delayMicroseconds(1);
       digitalWrite(YM_WR, HIGH);
       digitalWrite(YM_CS, HIGH);
       }
@@ -596,15 +609,15 @@ void loop()
       digitalWrite(YM_CS, LOW);
       SendYMByte(address);
       digitalWrite(YM_WR, LOW);
-      delayMicroseconds(1);
+      //delayMicroseconds(1);
       digitalWrite(YM_WR, HIGH);
       digitalWrite(YM_CS, HIGH);
-      delayMicroseconds(1);
+      //delayMicroseconds(1);
       digitalWrite(YM_A0, HIGH);
       digitalWrite(YM_CS, LOW);
       SendYMByte(data);
       digitalWrite(YM_WR, LOW);
-      delayMicroseconds(1);
+      //delayMicroseconds(1);
       digitalWrite(YM_WR, HIGH);
       digitalWrite(YM_CS, HIGH);
       }
@@ -624,7 +637,8 @@ void loop()
       {
         wait += ( uint32_t( GetByte() ) << ( 8 * i ));
       }
-      if(lastWaitData61 != wait) //Avoid doing lots of unnecessary division.
+
+      if(floor(lastWaitData61) != wait) //Avoid doing lots of unnecessary division.
       {
         lastWaitData61 = wait;
         if(wait == 0)
@@ -716,23 +730,21 @@ void loop()
         uint32_t wait = cmd & 0x0F;
         byte address = 0x2A;
         byte data = pcmBuffer[pcmBufferPosition++];
-        //pcmBufferPosition++;
         digitalWrite(YM_A1, LOW);
         digitalWrite(YM_A0, LOW);
         digitalWrite(YM_CS, LOW);
-        //ShiftControlFast(B00011010);
-        delayMicroseconds(1);
+        //delayMicroseconds(1);
         SendYMByte(address);
         digitalWrite(YM_WR, LOW);
-        delayMicroseconds(1);
+        //delayMicroseconds(1);
         digitalWrite(YM_WR, HIGH);
         digitalWrite(YM_CS, HIGH);
-        delayMicroseconds(1);
+        //delayMicroseconds(1);
         digitalWrite(YM_A0, HIGH);
         digitalWrite(YM_CS, LOW);
         SendYMByte(data);
         digitalWrite(YM_WR, LOW);
-        delayMicroseconds(1);
+        //delayMicroseconds(1);
         digitalWrite(YM_WR, HIGH);
         digitalWrite(YM_CS, HIGH);
         startTime = timeInMicros;

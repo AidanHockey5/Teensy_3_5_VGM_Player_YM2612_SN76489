@@ -19,3 +19,8 @@ byte SN_DATA[8] = {24, 25, 26, 27, 28, 29, 30, 31};
 //LTC6903 External Clocks
 #define SN_CLOCK_CS 32
 //#define YM_CLOCK_CS 14
+
+//External Buttons
+#define FWD_BTN 23
+#define RNG_BTN 22
+#define PRV_BTN 21
