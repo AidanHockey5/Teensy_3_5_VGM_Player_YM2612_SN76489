@@ -12,3 +12,5 @@ Goals for this project include:
 * G3D parsing support
 * "Pick your song" via serial support.
 * Full playback speed, even for songs with large PCM samples.
+
+This project was built using PlatformIO for Atom.
