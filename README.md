@@ -53,7 +53,7 @@ If you'd like to use an LTC6903 for the YM2612, you must comment-out ```#define 
 ```
 // pinMode(YM_CLOCK_CS, OUTPUT);
 // digitalWrite(YM_CLOCK_CS, HIGH);
-// SetClock(12, 912, SN_CLOCK_CS); //7.67 MHz
+// SetClock(12, 912, YM_CLOCK_CS); //7.67 MHz
 ```
 
 inside of main.cpp setup function.
