@@ -100,3 +100,8 @@ Button Pin | Result
 21 | Previous Track
 
 These button pins can also be changed in ChipPinMapping.h
+
+# Schematic 
+![Schematic](https://github.com/AidanHockey5/Teensy_3_5_VGM_Player_YM2612_SN76489/raw/master/SchematicsAndInfo/Teensy_3_5_VGM_Player.sch.png)
+
+[PDF](https://github.com/AidanHockey5/Teensy_3_5_VGM_Player_YM2612_SN76489/raw/master/SchematicsAndInfo/Teensy_3_5_VGM_Player.pdf)
