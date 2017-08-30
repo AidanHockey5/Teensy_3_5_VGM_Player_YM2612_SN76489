@@ -73,11 +73,11 @@ You can use a serial connection to control playback features. The commands are a
 
 Command | Result
 ------------ | -------------
-+ | Next Track
-- | Previous Track
-* | Random Track
-/ | Toggle Shuffle Mode
-. | Toggle Song Looping
+\+ | Next Track
+\- | Previous Track
+\* | Random Track
+\/ | Toggle Shuffle Mode
+\. | Toggle Song Looping
 r: | Request song
 
 A song request is formatted as follows: ```r:mySongFile.vgm```
