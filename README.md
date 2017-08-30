@@ -2,6 +2,7 @@
 A hardware Sega Genesis / Master system video game music player based on the Teensy 3.5
 
 This is the offical successor to my original ESP8266 VGM player https://github.com/AidanHockey5/ESP8266_VGM_Player_PSG_YM2612
+
 This project was built using PlatformIO for Atom.
 
 # Required Libraries
@@ -52,7 +53,7 @@ If you'd like to use an LTC6903 for the YM2612, you must comment-out ```#define 
 ```
 // pinMode(YM_CLOCK_CS, OUTPUT);
 // digitalWrite(YM_CLOCK_CS, HIGH);
-//SetClock(12, 912, SN_CLOCK_CS); //7.67 MHz
+// SetClock(12, 912, SN_CLOCK_CS); //7.67 MHz
 ```
 
 inside of main.cpp setup function.
