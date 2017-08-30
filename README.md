@@ -67,3 +67,18 @@ Teensy 3.5 | LTC6903 (clocking YM2612 @ 7.67 MHz)
 # SD Card Information
 The Teensy 3.5 has a built-in, high speed micro-SD card reader. You must format your SD card to Fat32 in order for this device to work correctly. Your SD card must only contain uncompressed .vgm files. VGZ FILES WILL NOT WORK! You may download .vgz files and use [7zip](http://www.7-zip.org/download.html) to extract the uncompressed file out of them. Vgm files on the SD card do not need to have the .vgm extention. As long as they contain valid, uncompressed vgm data, they will be read by the program regardless of their name.
 You can find VGM files by Googling "myGameName VGM," or by checking out sites like http://project2612.org/
+
+# Control Over Serial
+You can use a serial connection to control playback features. The commands are as follows:
+
+Command | Result
+------------ | -------------
++ | Next Track
+- | Previous Track
+* | Random Track
+/ | Toggle Shuffle Mode
+. | Toggle Song Looping
+r: | Request song
+
+A song request is formatted as follows: ```r:mySongFile.vgm```
+Once a song request is sent through the serial console, an attempt will be made to open that song file. The file must exist on the Teensy's SD card, and spelling/capitalization must be correct.
