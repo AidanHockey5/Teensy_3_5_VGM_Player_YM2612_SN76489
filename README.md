@@ -82,3 +82,13 @@ r: | Request song
 
 A song request is formatted as follows: ```r:mySongFile.vgm```
 Once a song request is sent through the serial console, an attempt will be made to open that song file. The file must exist on the Teensy's SD card, and spelling/capitalization must be correct.
+
+Additionally, you can connect buttons to pins 23, 22, and 21 for dedicated playback controls. These buttons should connect to ground when pushed since the software turns on the internal pullup resistors for those pins.
+
+Button Pin | Result
+------------ | -------------
+23 | Next Track
+22 | Random Track
+21 | Previous Track
+
+These button pins can also be changed in ChipPinMapping.h
