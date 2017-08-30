@@ -457,7 +457,7 @@ void setup()
   SetClock(11, 831, SN_CLOCK_CS); //3.58 MHz
   // pinMode(YM_CLOCK_CS, OUTPUT);
   // digitalWrite(YM_CLOCK_CS, HIGH);
-  //SetClock(12, 912, SN_CLOCK_CS); //7.67 MHz
+  //SetClock(12, 912, YM_CLOCK_CS); //7.67 MHz
 
   //Setup Data pins
   for(int i = 0; i<8; i++)
