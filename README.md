@@ -64,6 +64,14 @@ Teensy 3.5 | LTC6903 (clocking YM2612 @ 7.67 MHz)
 13 | SCK
 14 | SEN/ADR
 
+# OLED Display
+This project utilizes a 128x64 monochromatic I2C OLED display to show track information parsed from the GD3 data within the VGM file. Be careful, as this is a 3.3 volt part and must not be powered by 5 volts. The connection pins are:
+
+Teensy 3.5 | 128x64 I2C OLED
+------------ | -------------
+18 | SDA
+19 | SCL
+
 # SD Card Information
 The Teensy 3.5 has a built-in, high speed micro-SD card reader. You must format your SD card to Fat32 in order for this device to work correctly. Your SD card must only contain uncompressed .vgm files. VGZ FILES WILL NOT WORK! You may download .vgz files and use [7zip](http://www.7-zip.org/download.html) to extract the uncompressed file out of them. Vgm files on the SD card do not need to have the .vgm extention. As long as they contain valid, uncompressed vgm data, they will be read by the program regardless of their name.
 You can find VGM files by Googling "myGameName VGM," or by checking out sites like http://project2612.org/
