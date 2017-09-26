@@ -24,3 +24,8 @@ byte SN_DATA[8] = {24, 25, 26, 27, 28, 29, 30, 31};
 #define FWD_BTN 23
 #define RNG_BTN 22
 #define PRV_BTN 21
+
+//UART Bluetooth module
+//Serial2
+#define BT_RX 9
+#define BT_TX 10

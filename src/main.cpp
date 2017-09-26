@@ -495,6 +495,12 @@ void setup()
   }
   countFile.close();
   SD.vwd()->rewind();
+
+  //Prepare UART Bluetooth module
+  pinMode(BT_RX, INPUT);
+  pinMode(BT_TX, OUTPUT);
+  Serial2.begin(9600); //Hardware UART port 2
+
   u8g2.begin();
   u8g2.firstPage();
   u8g2.setFont(u8g2_font_helvB08_tr);
@@ -511,9 +517,11 @@ void setup()
 
 void loop()
 {
-  while(Serial.available())
+  while(Serial.available() || Serial2.available())
   {
-    switch(Serial.read())
+    bool USBorBluetooh = Serial.available();
+    char serialCmd = USBorBluetooh ? Serial.read() : Serial2.read();
+    switch(serialCmd)
     {
       case '+': //Next song
         StartupSequence(NEXT);
@@ -535,7 +543,7 @@ void loop()
         DrawOledPage();
       break;
       case 'r': //Song Request, format:  r:mySongFileName.vgm - An attempt will be made to find and open that file.
-        String req = Serial.readString(1024);
+        String req = USBorBluetooh ? Serial.readString(1024) : Serial2.readString(1024);
         req.remove(0, 1); //Remove colon character
         StartupSequence(REQUEST, req);
       break;
