@@ -1,6 +1,10 @@
 # Teensy 3.5 VGM Player Featuring YM2612 & SN76489
 A hardware Sega Genesis / Master system video game music player based on the Teensy 3.5
 
+You can view this project in action here: https://youtu.be/NRJg7PMI2ok
+
+For more information, visit: http://www.aidanlawrence.com/hardware-sega-genesis-video-game-music-player-2-0/
+
 This is the offical successor to my original ESP8266 VGM player https://github.com/AidanHockey5/ESP8266_VGM_Player_PSG_YM2612
 
 This project was built using PlatformIO for Atom.
@@ -100,3 +104,8 @@ Button Pin | Result
 21 | Previous Track
 
 These button pins can also be changed in ChipPinMapping.h
+
+# Schematic 
+![Schematic](https://github.com/AidanHockey5/Teensy_3_5_VGM_Player_YM2612_SN76489/raw/master/SchematicsAndInfo/Teensy_3_5_VGM_Player.sch.png)
+
+[PDF](https://github.com/AidanHockey5/Teensy_3_5_VGM_Player_YM2612_SN76489/raw/master/SchematicsAndInfo/Teensy_3_5_VGM_Player.pdf)
