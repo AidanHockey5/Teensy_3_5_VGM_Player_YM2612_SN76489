@@ -2,10 +2,10 @@
 #include <SPI.h>
 #include <SdFat.h>
 #include <Wire.h>
-#include <U8g2lib.h>
+//#include <U8g2lib.h>
 
 //OLED
-U8G2_SH1106_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, 19, 18, U8X8_PIN_NONE);
+//U8G2_SH1106_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, 19, 18, U8X8_PIN_NONE);
 
 //File Stream
 SdFatSdio SD;
@@ -39,8 +39,9 @@ uint8_t cmd;
 uint32_t loopOffset = 0;
 uint16_t loopCount = 0;
 uint16_t nextSongAfterXLoops = 3;
-enum PlayMode {LOOP, PAUSE, SHUFFLE, IN_ORDER};
+enum PlayMode {LOOP, PAUSE, SHUFFLE, IN_ORDER, PAUSED};
 PlayMode playMode = SHUFFLE;
+PlayMode playModeBeforePause = SHUFFLE;
 
 //GD3 Data
 String trackTitle;
@@ -266,7 +267,7 @@ void RemoveSVI() //Sometimes, Windows likes to place invisible files in our SD c
   nextFile.close();
 }
 
-void DrawOledPage()
+/*void DrawOledPage()
 {
   u8g2.clearDisplay();
   u8g2.setFont(u8g2_font_helvR08_te);
@@ -297,7 +298,7 @@ void DrawOledPage()
   cstr = &loopShuffleStatus[0u];
   u8g2.drawStr(0, 60, cstr);
   u8g2.sendBuffer();
-}
+}*/
 
 enum StartUpProfile {FIRST_START, NEXT, PREVIOUS, RNG, REQUEST};
 void StartupSequence(StartUpProfile sup, String request = "")
@@ -445,16 +446,16 @@ void StartupSequence(StartUpProfile sup, String request = "")
 
     SilenceAllChannels();
     digitalWrite(SN_WE, HIGH);
-    DrawOledPage();
+    //DrawOledPage();
     delay(500);
 }
 
 void setup()
 {
   //Set up SN_Clock
-  pinMode(SN_CLOCK_CS, OUTPUT);
-  digitalWrite(SN_CLOCK_CS, HIGH);
-  SetClock(11, 831, SN_CLOCK_CS); //3.58 MHz
+  //pinMode(SN_CLOCK_CS, OUTPUT);
+  //digitalWrite(SN_CLOCK_CS, HIGH);
+  //SetClock(11, 831, SN_CLOCK_CS); //3.58 MHz
   // pinMode(YM_CLOCK_CS, OUTPUT);
   // digitalWrite(YM_CLOCK_CS, HIGH);
   //SetClock(12, 912, YM_CLOCK_CS); //7.67 MHz
@@ -470,6 +471,7 @@ void setup()
   pinMode(FWD_BTN, INPUT_PULLUP);
   pinMode(RNG_BTN, INPUT_PULLUP);
   pinMode(PRV_BTN, INPUT_PULLUP);
+  pinMode(PSE_BTN, INPUT_PULLUP);
 
   //Sound chip control pins
   pinMode(SN_WE, OUTPUT);
@@ -497,10 +499,10 @@ void setup()
   SD.vwd()->rewind();
 
   //Prepare UART Bluetooth module
-  pinMode(BT_RX, INPUT);
-  pinMode(BT_TX, OUTPUT);
-  Serial2.begin(9600); //Hardware UART port 2
-
+  //pinMode(BT_RX, INPUT);
+  //pinMode(BT_TX, OUTPUT);
+  //Serial2.begin(9600); //Hardware UART port 2
+/*
   u8g2.begin();
   u8g2.firstPage();
   u8g2.setFont(u8g2_font_helvB08_tr);
@@ -511,7 +513,7 @@ void setup()
   u8g2.sendBuffer();
   delay(1500);
   u8g2.clearDisplay();
-  u8g2.sendBuffer();
+  u8g2.sendBuffer();*/
   StartupSequence(FIRST_START);
 }
 
@@ -535,12 +537,25 @@ void loop()
       case '/': //Toggle shuffle mode
         playMode == SHUFFLE ? playMode = IN_ORDER : playMode = SHUFFLE;
         playMode == SHUFFLE ? Serial.println("SHUFFLE ON") : Serial.println("SHUFFLE OFF");
-        DrawOledPage();
+        //DrawOledPage();
       break;
       case '.': //Toggle loop mode
         playMode == LOOP ? playMode = IN_ORDER : playMode = LOOP;
         playMode == LOOP ? Serial.println("LOOP ON") : Serial.println("LOOP OFF");
-        DrawOledPage();
+        //DrawOledPage();
+      break;
+      case 'p': //Pause/Unpause
+        if (playMode != PAUSED)
+        {
+          playModeBeforePause = playMode;
+          playMode = PAUSED;
+          Serial.println("PAUSE START");
+        }
+        else
+        {
+          playMode = playModeBeforePause;
+          Serial.println("PAUSE END");
+        }
       break;
       case 'r': //Song Request, format:  r:mySongFileName.vgm - An attempt will be made to find and open that file.
         String req = USBorBluetooh ? Serial.readString(1024) : Serial2.readString(1024);
@@ -556,6 +571,24 @@ void loop()
     StartupSequence(PREVIOUS);
   if(!digitalRead(RNG_BTN))
     StartupSequence(RNG);
+  if(!digitalRead(PSE_BTN))
+  {
+    if (playMode != PAUSED)
+    {
+      playModeBeforePause = playMode;
+      playMode = PAUSED;
+      //SilenceAllChannels();
+      //Serial.println("PAUSE START");
+    }
+    else
+    {
+      playMode = playModeBeforePause;
+      //Serial.println("PAUSE END");
+    }
+  }
+
+  if (playMode == PAUSED)
+    return;
 
 
   if(loopCount >= nextSongAfterXLoops)
