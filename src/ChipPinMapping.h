@@ -17,15 +17,16 @@ byte SN_DATA[8] = {24, 25, 26, 27, 28, 29, 30, 31};
 #define SN_WE 39
 
 //LTC6903 External Clocks
-#define SN_CLOCK_CS 32
+//#define SN_CLOCK_CS 32
 //#define YM_CLOCK_CS 14
 
 //External Buttons
 #define FWD_BTN 23
 #define RNG_BTN 22
 #define PRV_BTN 21
+#define PSE_BTN 20
 
 //UART Bluetooth module
 //Serial2
-#define BT_RX 9
-#define BT_TX 10
+//#define BT_RX 9
+//#define BT_TX 10
