@@ -5,7 +5,7 @@ You can view this project in action here: https://youtu.be/NRJg7PMI2ok
 
 For more information, visit: http://www.aidanlawrence.com/hardware-sega-genesis-video-game-music-player-2-0/
 
-This is the offical successor to my original ESP8266 VGM player https://github.com/AidanHockey5/ESP8266_VGM_Player_PSG_YM2612
+This is the official successor to my original ESP8266 VGM player https://github.com/AidanHockey5/ESP8266_VGM_Player_PSG_YM2612
 
 This project was built using PlatformIO for Atom.
 
@@ -24,7 +24,7 @@ http://www.smspower.org/uploads/Music/vgmspec170.txt?sid=58da937e68300c059412b53
 
 # Hook-up Guide
 
-This set of hook-up tables is based on the pin numbers listed in ChipPinMapping.h. You may change any of these pins to suit your build inside of ChipPinMapping.h, but it is not reccomened to change any SPI or I2C data bus pins.
+This set of hook-up tables is based on the pin numbers listed in ChipPinMapping.h. You may change any of these pins to suit your build inside of ChipPinMapping.h, but it is not recommended to change any SPI or I2C data bus pins.
 
 Teensy 3.5 | YM2612
 ------------ | -------------
@@ -56,7 +56,7 @@ If you'd like to use an LTC6903 for the YM2612, you must comment-out ```#define 
 
 ```
 // pinMode(YM_CLOCK_CS, OUTPUT);
-// digitalWrite(YM_CLOCK_CS, HIGH);
+// digitalWriteFast(YM_CLOCK_CS, HIGH);
 // SetClock(12, 912, YM_CLOCK_CS); //7.67 MHz
 ```
 
@@ -77,7 +77,7 @@ Teensy 3.5 | 128x64 I2C OLED
 19 | SCL
 
 # SD Card Information
-The Teensy 3.5 has a built-in, high speed micro-SD card reader. You must format your SD card to Fat32 in order for this device to work correctly. Your SD card must only contain uncompressed .vgm files. VGZ FILES WILL NOT WORK! You may download .vgz files and use [7zip](http://www.7-zip.org/download.html) to extract the uncompressed file out of them. Vgm files on the SD card do not need to have the .vgm extention. As long as they contain valid, uncompressed vgm data, they will be read by the program regardless of their name.
+The Teensy 3.5 has a built-in, high speed micro-SD card reader. You must format your SD card to Fat32 in order for this device to work correctly. Your SD card must only contain uncompressed .vgm files. VGZ FILES WILL NOT WORK! You may download .vgz files and use [7zip](http://www.7-zip.org/download.html) to extract the uncompressed file out of them. Vgm files on the SD card do not need to have the .vgm extension. As long as they contain valid, uncompressed vgm data, they will be read by the program regardless of their name.
 You can find VGM files by Googling "myGameName VGM," or by checking out sites like http://project2612.org/
 
 # Control Over Serial
@@ -105,7 +105,7 @@ Button Pin | Result
 
 These button pins can also be changed in ChipPinMapping.h
 
-# Schematic 
+# Schematic
 ![Schematic](https://github.com/AidanHockey5/Teensy_3_5_VGM_Player_YM2612_SN76489/raw/master/SchematicsAndInfo/Teensy_3_5_VGM_Player.sch.png)
 
 [PDF](https://github.com/AidanHockey5/Teensy_3_5_VGM_Player_YM2612_SN76489/raw/master/SchematicsAndInfo/Teensy_3_5_VGM_Player.pdf)

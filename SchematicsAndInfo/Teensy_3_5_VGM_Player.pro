@@ -1,4 +1,4 @@
-update=8/30/2017 12:17:06 PM
+update=10/25/2017 1:04:40 PM
 version=1
 last_client=kicad
 [pcbnew]
@@ -60,3 +60,5 @@ LibName28=contrib
 LibName29=valves
 LibName30=teensy_library-master/teensy
 LibName31=switches
+LibName32=C:/Users/Aidan/Documents/KiCad_Custom_Libs/3.5mm_STEREO_JACK_TRS
+LibName33=C:/Users/Aidan/Documents/KiCad_Custom_Libs/ARDUINO-NANO-3.0_ISP

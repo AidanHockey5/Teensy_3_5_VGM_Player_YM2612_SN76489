@@ -48,6 +48,13 @@ String gameName;
 String systemName;
 String gameDate;
 
+void wait10nS(int multiplier) //10 ns of delay * multiplier. Teensy 3.5 specific value due to clock speed. Adjust as needed.
+{
+  int i = multiplier;
+  while(i --> 0)
+    __asm__ volatile ("nop"); //Approx. 10 ns of delay
+}
+
 void SetClock(uint16_t oct, uint16_t dac, unsigned char target)
 {
   SPI.begin();
@@ -56,10 +63,10 @@ void SetClock(uint16_t oct, uint16_t dac, unsigned char target)
   uint16_t BitMap = (oct << 12) | (dac << 2) | CNF;
   byte Byte1=(byte)(BitMap >> 8 );
   byte Byte2=(byte)BitMap;
-  digitalWrite(target, LOW);
+  digitalWriteFast(target, LOW);
   SPI.transfer(Byte1);
   SPI.transfer(Byte2);
-  digitalWrite(target, HIGH);
+  digitalWriteFast(target, HIGH);
   SPI.endTransaction();
 }
 
@@ -80,21 +87,22 @@ byte GetByte()
 
 void SendSNByte(byte b)
 {
-  digitalWrite(SN_WE, HIGH);
+  digitalWriteFast(SN_WE, HIGH);
   for(int i=0; i<8; i++)
   {
-    digitalWrite(SN_DATA[i], ((b >> i)&1));
+    digitalWriteFast(SN_DATA[i], ((b >> i)&1));
   }
-  digitalWrite(SN_WE, LOW);
-  delayMicroseconds(13);
-  digitalWrite(SN_WE, HIGH);
+  digitalWriteFast(SN_WE, LOW);
+  wait10nS(150);
+  //delayMicroseconds(13);
+  digitalWriteFast(SN_WE, HIGH);
 }
 
 void SendYMByte(byte b)
 {
     for(int i=0; i<8; i++)
     {
-      digitalWrite(YM_DATA[i], ((b >> i)&1));
+      digitalWriteFast(YM_DATA[i], ((b >> i)&1));
     }
 }
 
@@ -125,16 +133,16 @@ void SilenceAllChannels()
   SendSNByte(0xdf);
   SendSNByte(0xff);
 
-  digitalWrite(YM_A0, LOW);
-  digitalWrite(YM_A1, LOW);
-  digitalWrite(YM_CS, HIGH);
-  digitalWrite(YM_WR, HIGH);
-  digitalWrite(YM_RD, HIGH);
-  digitalWrite(YM_IC, HIGH);
+  digitalWriteFast(YM_A0, LOW);
+  digitalWriteFast(YM_A1, LOW);
+  digitalWriteFast(YM_CS, HIGH);
+  digitalWriteFast(YM_WR, HIGH);
+  digitalWriteFast(YM_RD, HIGH);
+  digitalWriteFast(YM_IC, HIGH);
   delay(1);
-  digitalWrite(YM_IC, LOW);
+  digitalWriteFast(YM_IC, LOW);
   delay(1);
-  digitalWrite(YM_IC, HIGH);
+  digitalWriteFast(YM_IC, HIGH);
 }
 
 uint32_t Read32() //Read 32 bit value from buffer
@@ -444,7 +452,7 @@ void StartupSequence(StartUpProfile sup, String request = "")
     }
 
     SilenceAllChannels();
-    digitalWrite(SN_WE, HIGH);
+    digitalWriteFast(SN_WE, HIGH);
     DrawOledPage();
     delay(500);
 }
@@ -453,10 +461,10 @@ void setup()
 {
   //Set up SN_Clock
   pinMode(SN_CLOCK_CS, OUTPUT);
-  digitalWrite(SN_CLOCK_CS, HIGH);
+  digitalWriteFast(SN_CLOCK_CS, HIGH);
   SetClock(11, 831, SN_CLOCK_CS); //3.58 MHz
   // pinMode(YM_CLOCK_CS, OUTPUT);
-  // digitalWrite(YM_CLOCK_CS, HIGH);
+  // digitalWriteFast(YM_CLOCK_CS, HIGH);
   //SetClock(12, 912, YM_CLOCK_CS); //7.67 MHz
 
   //Setup Data pins
@@ -585,23 +593,23 @@ void loop()
       {
       byte address = GetByte();
       byte data = GetByte();
-      digitalWrite(YM_A1, LOW);
-      digitalWrite(YM_A0, LOW);
-      digitalWrite(YM_CS, LOW);
-      //Areas like this may require 1 microsecond delays.
+      digitalWriteFast(YM_A1, LOW);
+      digitalWriteFast(YM_A0, LOW);
+      digitalWriteFast(YM_CS, LOW);
+      //Areas like this may require 100 ns delays.
       SendYMByte(address);
-      digitalWrite(YM_WR, LOW);
-      //delayMicroseconds(1);
-      digitalWrite(YM_WR, HIGH);
-      digitalWrite(YM_CS, HIGH);
-      //delayMicroseconds(1);
-      digitalWrite(YM_A0, HIGH);
-      digitalWrite(YM_CS, LOW);
+      digitalWriteFast(YM_WR, LOW);
+              wait10nS(10);
+      digitalWriteFast(YM_WR, HIGH);
+      digitalWriteFast(YM_CS, HIGH);
+              wait10nS(10);
+      digitalWriteFast(YM_A0, HIGH);
+      digitalWriteFast(YM_CS, LOW);
       SendYMByte(data);
-      digitalWrite(YM_WR, LOW);
-      //delayMicroseconds(1);
-      digitalWrite(YM_WR, HIGH);
-      digitalWrite(YM_CS, HIGH);
+      digitalWriteFast(YM_WR, LOW);
+              wait10nS(10);
+      digitalWriteFast(YM_WR, HIGH);
+      digitalWriteFast(YM_CS, HIGH);
       }
       startTime = timeInMicros;
       pauseTime = singleSampleWait;
@@ -612,22 +620,22 @@ void loop()
       {
       byte address = GetByte();
       byte data = GetByte();
-      digitalWrite(YM_A1, HIGH);
-      digitalWrite(YM_A0, LOW);
-      digitalWrite(YM_CS, LOW);
+      digitalWriteFast(YM_A1, HIGH);
+      digitalWriteFast(YM_A0, LOW);
+      digitalWriteFast(YM_CS, LOW);
       SendYMByte(address);
-      digitalWrite(YM_WR, LOW);
-      //delayMicroseconds(1);
-      digitalWrite(YM_WR, HIGH);
-      digitalWrite(YM_CS, HIGH);
-      //delayMicroseconds(1);
-      digitalWrite(YM_A0, HIGH);
-      digitalWrite(YM_CS, LOW);
+      digitalWriteFast(YM_WR, LOW);
+              wait10nS(10);
+      digitalWriteFast(YM_WR, HIGH);
+      digitalWriteFast(YM_CS, HIGH);
+              wait10nS(10);
+      digitalWriteFast(YM_A0, HIGH);
+      digitalWriteFast(YM_CS, LOW);
       SendYMByte(data);
-      digitalWrite(YM_WR, LOW);
-      //delayMicroseconds(1);
-      digitalWrite(YM_WR, HIGH);
-      digitalWrite(YM_CS, HIGH);
+      digitalWriteFast(YM_WR, LOW);
+              wait10nS(10);
+      digitalWriteFast(YM_WR, HIGH);
+      digitalWriteFast(YM_CS, HIGH);
       }
       startTime = timeInMicros;
       pauseTime = singleSampleWait;
@@ -738,23 +746,24 @@ void loop()
         uint32_t wait = cmd & 0x0F;
         byte address = 0x2A;
         byte data = pcmBuffer[pcmBufferPosition++];
-        digitalWrite(YM_A1, LOW);
-        digitalWrite(YM_A0, LOW);
-        digitalWrite(YM_CS, LOW);
+        digitalWriteFast(YM_A1, LOW);
+        digitalWriteFast(YM_A0, LOW);
+        digitalWriteFast(YM_CS, LOW);
         //delayMicroseconds(1);
         SendYMByte(address);
-        digitalWrite(YM_WR, LOW);
+        wait10nS(10);
+        digitalWriteFast(YM_WR, LOW);
+        wait10nS(10);
+        digitalWriteFast(YM_WR, HIGH);
+        digitalWriteFast(YM_CS, HIGH);
         //delayMicroseconds(1);
-        digitalWrite(YM_WR, HIGH);
-        digitalWrite(YM_CS, HIGH);
-        //delayMicroseconds(1);
-        digitalWrite(YM_A0, HIGH);
-        digitalWrite(YM_CS, LOW);
+        digitalWriteFast(YM_A0, HIGH);
+        digitalWriteFast(YM_CS, LOW);
         SendYMByte(data);
-        digitalWrite(YM_WR, LOW);
-        //delayMicroseconds(1);
-        digitalWrite(YM_WR, HIGH);
-        digitalWrite(YM_CS, HIGH);
+        digitalWriteFast(YM_WR, LOW);
+        wait10nS(10);
+        digitalWriteFast(YM_WR, HIGH);
+        digitalWriteFast(YM_CS, HIGH);
         startTime = timeInMicros;
         pauseTime = preCalced8nDelays[wait];
         }
