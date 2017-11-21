@@ -21,9 +21,11 @@ byte SN_DATA[8] = {24, 25, 26, 27, 28, 29, 30, 31};
 #define YM_CLOCK_CS 14
 
 //External Buttons
-#define FWD_BTN 23
-#define RNG_BTN 22
-#define PRV_BTN 21
+#define FWD_BTN 20
+#define RNG_BTN 21
+#define PRV_BTN 22
+#define SHFF_BTN 17
+#define LOOP_BTN 23
 
 //UART Bluetooth module
 //Serial2

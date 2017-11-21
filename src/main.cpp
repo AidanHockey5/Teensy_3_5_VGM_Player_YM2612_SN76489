@@ -478,6 +478,8 @@ void setup()
   pinMode(FWD_BTN, INPUT_PULLUP);
   pinMode(RNG_BTN, INPUT_PULLUP);
   pinMode(PRV_BTN, INPUT_PULLUP);
+  pinMode(LOOP_BTN, INPUT_PULLUP);
+  pinMode(SHFF_BTN, INPUT_PULLUP);
 
   //Sound chip control pins
   pinMode(SN_WE, OUTPUT);
@@ -513,6 +515,13 @@ void setup()
   pinMode(BT_RX, INPUT);
   pinMode(BT_TX, OUTPUT);
   Serial2.begin(9600); //Hardware UART port 2
+
+  // Serial2.write("AT");
+  // delay(1000);
+  // Serial2.write("AT+NAME:VGM_Player");
+  // delay(1000);
+  // Serial2.write("AT+PIN:1234");
+  // delay(1000);
 
   u8g2.drawStr(30,10,"Aidan Lawrence");
   u8g2.drawStr(50,20,"2017");
@@ -566,6 +575,18 @@ void loop()
     StartupSequence(PREVIOUS);
   if(!digitalRead(RNG_BTN))
     StartupSequence(RNG);
+  if(!digitalRead(SHFF_BTN))
+  {
+    playMode == SHUFFLE ? playMode = IN_ORDER : playMode = SHUFFLE;
+    playMode == SHUFFLE ? Serial.println("SHUFFLE ON") : Serial.println("SHUFFLE OFF");
+    DrawOledPage();    
+  }
+  if(!digitalRead(LOOP_BTN))
+  {
+    playMode == LOOP ? playMode = IN_ORDER : playMode = LOOP;
+    playMode == LOOP ? Serial.println("LOOP ON") : Serial.println("LOOP OFF");
+    DrawOledPage();     
+  }
 
 
   if(loopCount >= nextSongAfterXLoops)
