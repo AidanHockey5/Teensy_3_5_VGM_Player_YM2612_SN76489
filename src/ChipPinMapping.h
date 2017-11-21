@@ -4,7 +4,7 @@ byte YM_DATA[8] = {0,1,2,3,4,5,6,7};
 
 //YM_CONTROL
 #define YM_IC 38
-#define YM_CS 37
+#define YM_CS 39
 #define YM_WR 36
 #define YM_RD 35
 #define YM_A0 34
@@ -14,11 +14,11 @@ byte YM_DATA[8] = {0,1,2,3,4,5,6,7};
 byte SN_DATA[8] = {24, 25, 26, 27, 28, 29, 30, 31};
 
 //SN_CONTROL
-#define SN_WE 39
+#define SN_WE 37
 
 //LTC6903 External Clocks
 #define SN_CLOCK_CS 32
-//#define YM_CLOCK_CS 14
+#define YM_CLOCK_CS 14
 
 //External Buttons
 #define FWD_BTN 23

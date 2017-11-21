@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "gdb",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "name": "PlatformIO Debugger",
+            "target": "c:/Users/Aidan/Documents/Arduino/Teensy_3_5_VGM_Player_YM2612_SN76489/.pioenvs/teensy35/firmware.elf",
+            "gdbpath": "C:/Users/Aidan/.platformio/penv/Scripts/piodebuggdb",
+            "autorun": [ "source .pioinit" ]
+        }
+    ]
+}

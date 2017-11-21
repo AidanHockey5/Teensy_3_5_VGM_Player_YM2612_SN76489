@@ -10,7 +10,7 @@ U8G2_SH1106_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, 19, 18, U8X8_PIN_NONE);
 //File Stream
 SdFatSdio SD;
 File vgm;
-const unsigned int MAX_CMD_BUFFER = 32;
+const unsigned int MAX_CMD_BUFFER = 1;
 char cmdBuffer[MAX_CMD_BUFFER];
 uint32_t bufferPos = 0;
 const unsigned int MAX_FILE_NAME_SIZE = 1024;
@@ -58,7 +58,7 @@ void wait10nS(int multiplier) //10 ns of delay * multiplier. Teensy 3.5 specific
 void SetClock(uint16_t oct, uint16_t dac, unsigned char target)
 {
   SPI.begin();
-  SPI.beginTransaction(SPISettings(20000000, MSBFIRST, SPI_MODE0));
+  //SPI.beginTransaction(SPISettings(20000000, MSBFIRST, SPI_MODE0));
   unsigned char CNF = 0b00000000;
   uint16_t BitMap = (oct << 12) | (dac << 2) | CNF;
   byte Byte1=(byte)(BitMap >> 8 );
@@ -463,9 +463,9 @@ void setup()
   pinMode(SN_CLOCK_CS, OUTPUT);
   digitalWriteFast(SN_CLOCK_CS, HIGH);
   SetClock(11, 831, SN_CLOCK_CS); //3.58 MHz
-  // pinMode(YM_CLOCK_CS, OUTPUT);
-  // digitalWriteFast(YM_CLOCK_CS, HIGH);
-  //SetClock(12, 912, YM_CLOCK_CS); //7.67 MHz
+  pinMode(YM_CLOCK_CS, OUTPUT);
+  digitalWriteFast(YM_CLOCK_CS, HIGH);
+  SetClock(12, 912, YM_CLOCK_CS); //7.67 MHz
 
   //Setup Data pins
   for(int i = 0; i<8; i++)
@@ -487,11 +487,16 @@ void setup()
   pinMode(YM_RD, OUTPUT);
   pinMode(YM_A0, OUTPUT);
   pinMode(YM_A1, OUTPUT);
+  u8g2.begin();
+  u8g2.firstPage();
+  u8g2.setFont(u8g2_font_helvB08_tr);
   Serial.begin(115200);
   SilenceAllChannels();
   if(!SD.begin())
   {
       Serial.println("Card Mount Failed");
+      u8g2.drawStr(0,10, "Error. No SD Card");
+      u8g2.sendBuffer();
       return;
   }
   RemoveSVI();
@@ -509,9 +514,6 @@ void setup()
   pinMode(BT_TX, OUTPUT);
   Serial2.begin(9600); //Hardware UART port 2
 
-  u8g2.begin();
-  u8g2.firstPage();
-  u8g2.setFont(u8g2_font_helvB08_tr);
   u8g2.drawStr(30,10,"Aidan Lawrence");
   u8g2.drawStr(50,20,"2017");
   u8g2.drawStr(30,50,"Sega Genesis");
@@ -599,15 +601,15 @@ void loop()
       //Areas like this may require 100 ns delays.
       SendYMByte(address);
       digitalWriteFast(YM_WR, LOW);
-              wait10nS(10);
+              wait10nS(11);
       digitalWriteFast(YM_WR, HIGH);
       digitalWriteFast(YM_CS, HIGH);
-              wait10nS(10);
+              wait10nS(11);
       digitalWriteFast(YM_A0, HIGH);
       digitalWriteFast(YM_CS, LOW);
       SendYMByte(data);
       digitalWriteFast(YM_WR, LOW);
-              wait10nS(10);
+              wait10nS(11);
       digitalWriteFast(YM_WR, HIGH);
       digitalWriteFast(YM_CS, HIGH);
       }
@@ -625,15 +627,15 @@ void loop()
       digitalWriteFast(YM_CS, LOW);
       SendYMByte(address);
       digitalWriteFast(YM_WR, LOW);
-              wait10nS(10);
+              wait10nS(11);
       digitalWriteFast(YM_WR, HIGH);
       digitalWriteFast(YM_CS, HIGH);
-              wait10nS(10);
+              wait10nS(11);
       digitalWriteFast(YM_A0, HIGH);
       digitalWriteFast(YM_CS, LOW);
       SendYMByte(data);
       digitalWriteFast(YM_WR, LOW);
-              wait10nS(10);
+              wait10nS(11);
       digitalWriteFast(YM_WR, HIGH);
       digitalWriteFast(YM_CS, HIGH);
       }
@@ -689,6 +691,8 @@ void loop()
         {
           PCMdataSize += ( uint32_t( GetByte() ) << ( 8 * i ));
         }
+        if(PCMdataSize > MAX_PCM_BUFFER_SIZE)
+          StartupSequence(NEXT);
         //Serial.println(PCMdataSize);
 
         for ( int i = 0; i < PCMdataSize; i++ )
@@ -751,9 +755,9 @@ void loop()
         digitalWriteFast(YM_CS, LOW);
         //delayMicroseconds(1);
         SendYMByte(address);
-        wait10nS(10);
+        wait10nS(11);
         digitalWriteFast(YM_WR, LOW);
-        wait10nS(10);
+        wait10nS(11);
         digitalWriteFast(YM_WR, HIGH);
         digitalWriteFast(YM_CS, HIGH);
         //delayMicroseconds(1);
@@ -761,7 +765,7 @@ void loop()
         digitalWriteFast(YM_CS, LOW);
         SendYMByte(data);
         digitalWriteFast(YM_WR, LOW);
-        wait10nS(10);
+        wait10nS(11);
         digitalWriteFast(YM_WR, HIGH);
         digitalWriteFast(YM_CS, HIGH);
         startTime = timeInMicros;
