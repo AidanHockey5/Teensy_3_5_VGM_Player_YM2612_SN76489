@@ -3,6 +3,7 @@
 #include <SdFat.h>
 #include <Wire.h>
 #include <U8g2lib.h>
+#include <Adafruit_SleepyDog.h>
 
 //OLED
 U8G2_SH1106_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, 19, 18, U8X8_PIN_NONE);
@@ -310,6 +311,7 @@ void DrawOledPage()
 enum StartUpProfile {FIRST_START, NEXT, PREVIOUS, RNG, REQUEST};
 void StartupSequence(StartUpProfile sup, String request = "")
 {
+  Watchdog.enable(5000);
   File nextFile;
   ClearTrackData();
   switch(sup)
@@ -455,6 +457,8 @@ void StartupSequence(StartUpProfile sup, String request = "")
     digitalWriteFast(SN_WE, HIGH);
     DrawOledPage();
     delay(500);
+    Watchdog.reset();
+    Watchdog.disable();
 }
 
 void setup()
@@ -516,6 +520,7 @@ void setup()
   pinMode(BT_TX, OUTPUT);
   Serial2.begin(9600); //Hardware UART port 2
 
+  //Rename HC-06 bluetooth device
   // Serial2.write("AT");
   // delay(1000);
   // Serial2.write("AT+NAME:VGM_Player");
@@ -677,17 +682,8 @@ void loop()
         wait += ( uint32_t( GetByte() ) << ( 8 * i ));
       }
 
-      if(floor(lastWaitData61) != wait) //Avoid doing lots of unnecessary division.
-      {
-        lastWaitData61 = wait;
-        if(wait == 0)
-          break;
-        cachedWaitTime61 = ((1000.0 / (sampleRate/(float)wait))*1000);
-      }
-      //Serial.println(cachedWaitTime61);
-
       startTime = timeInMicros;
-      pauseTime = cachedWaitTime61;
+      pauseTime = singleSampleWait*wait;
       //delay(cachedWaitTime61);
       break;
       }
