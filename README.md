@@ -30,7 +30,7 @@ Teensy 3.5 | YM2612
 ------------ | -------------
 0-7 | D0-D7
 38  | IC
-37 | CS
+39 | CS (previously 37)
 36 | WR
 35 | RD
 34 | A0
@@ -39,7 +39,7 @@ Teensy 3.5 | YM2612
 Teensy 3.5 | SN76489 (PSG)
 ------------ | -------------
 24-31 | D0-D7
-39 | SN_WE
+37 | SN_WE (previously 39)
 
 # Clocking the Sound Chips
 You may attach a 7.67-7.68 MHz full-can crystal (or other signal source) to øM on the YM2612 and a 3.57-3.58 MHz full-can crystal (or other signal source) to the CLOCK pin on the SN67489. If you can not find crystals at this frequency, you can use LTC6903 SPI programmable oscillators. As my project stands, I'm only using an LTC6903 for the SN76489 and a 7.68 MHz crystal for the YM2612, but I've also included commented-out code for an LTC6903 applied to the YM2612.
@@ -51,16 +51,6 @@ Teensy 3.5 | LTC6903 (clocking SN76489 @ ~3.57 MHz)
 32 | SEN/ADR
 
 LTC6903 CLK_OUT -> SN76489 CLOCK PIN
-
-If you'd like to use an LTC6903 for the YM2612, you must comment-out ```#define YM_CLOCK_CS 14``` in ChipPinMapping.h. You must also comment-out:
-
-```
-// pinMode(YM_CLOCK_CS, OUTPUT);
-// digitalWriteFast(YM_CLOCK_CS, HIGH);
-// SetClock(12, 912, YM_CLOCK_CS); //7.67 MHz
-```
-
-inside of main.cpp setup function.
 
 Teensy 3.5 | LTC6903 (clocking YM2612 @ 7.67 MHz)
 ------------ | -------------
