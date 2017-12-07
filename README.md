@@ -7,7 +7,7 @@ For more information, visit: http://www.aidanlawrence.com/hardware-sega-genesis-
 
 This is the official successor to my original ESP8266 VGM player https://github.com/AidanHockey5/ESP8266_VGM_Player_PSG_YM2612
 
-This project was built using PlatformIO for Atom.
+This project was built using PlatformIO with Visual Studio Code.
 
 # Required Libraries
 This project requires [SdFat](https://github.com/greiman/SdFat) (included) and [U8G2](https://github.com/olikraus/u8g2) (not included)
