@@ -1,4 +1,4 @@
-update=10/25/2017 1:04:40 PM
+update=12/7/2017 1:42:16 PM
 version=1
 last_client=kicad
 [pcbnew]
@@ -27,7 +27,7 @@ NetIExt=net
 version=1
 [eeschema]
 version=1
-LibDir=
+LibDir=../../../KiCad_Custom_Libs
 [eeschema/libraries]
 LibName1=power
 LibName2=device
@@ -60,5 +60,13 @@ LibName28=contrib
 LibName29=valves
 LibName30=teensy_library-master/teensy
 LibName31=switches
-LibName32=C:/Users/Aidan/Documents/KiCad_Custom_Libs/3.5mm_STEREO_JACK_TRS
-LibName33=C:/Users/Aidan/Documents/KiCad_Custom_Libs/ARDUINO-NANO-3.0_ISP
+LibName32=ARDUINO-NANO-3.0_ISP
+LibName33=hc-sr04
+LibName34=l298n_module
+LibName35=LTC6903
+LibName36=OLED
+LibName37=pic12f683
+LibName38=SN74HC595_W_VCC
+LibName39=sn769486
+LibName40=ym2612
+LibName41=VGM_Components_Library

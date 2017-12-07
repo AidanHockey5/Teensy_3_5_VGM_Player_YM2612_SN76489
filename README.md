@@ -89,9 +89,11 @@ Additionally, you can connect buttons to pins 23, 22, and 21 for dedicated playb
 
 Button Pin | Result
 ------------ | -------------
-23 | Next Track
-22 | Random Track
-21 | Previous Track
+20 | Next Track
+21 | Random Track
+22 | Previous Track
+17 | Shuffle Toggle
+23 | Loop Toggle
 
 These button pins can also be changed in ChipPinMapping.h
 
