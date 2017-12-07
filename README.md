@@ -1,9 +1,9 @@
 # Teensy 3.5 VGM Player Featuring YM2612 & SN76489
 A hardware Sega Genesis / Master system video game music player based on the Teensy 3.5
 
-You can view this project in action here: https://youtu.be/NRJg7PMI2ok
+You can view this project in action here: https://youtu.be/oJf--M76etQ
 
-For more information, visit: http://www.aidanlawrence.com/hardware-sega-genesis-video-game-music-player-2-0/
+For more information, visit: http://www.aidanlawrence.com/hardware-sega-genesis-vgm-player-v-3/
 
 This is the official successor to my original ESP8266 VGM player https://github.com/AidanHockey5/ESP8266_VGM_Player_PSG_YM2612
 
