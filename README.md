@@ -10,7 +10,7 @@ This is the official successor to my original ESP8266 VGM player https://github.
 This project was built using PlatformIO with Visual Studio Code.
 
 # Required Libraries
-This project requires [SdFat](https://github.com/greiman/SdFat) (included), Adafruit Sleepydog(included), and [U8G2](https://github.com/olikraus/u8g2) (not included)
+This project requires [SdFat](https://github.com/greiman/SdFat) (included), [Adafruit Sleepydog](https://github.com/adafruit/Adafruit_SleepyDog) (included), and [U8G2](https://github.com/olikraus/u8g2) (not included)
 
 # Information about the main sound chips and VGM
 
