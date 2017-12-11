@@ -42,7 +42,7 @@ Teensy 3.5 | SN76489 (PSG)
 37 | SN_WE (previously 39)
 
 # Clocking the Sound Chips
-You may attach a 7.67-7.68 MHz full-can crystal (or other signal source) to øM on the YM2612 and a 3.57-3.58 MHz full-can crystal (or other signal source) to the CLOCK pin on the SN67489. If you can not find crystals at this frequency, you can use LTC6903 SPI programmable oscillators. As my project stands, I'm only using an LTC6903 for the SN76489 and a 7.68 MHz crystal for the YM2612, but I've also included commented-out code for an LTC6903 applied to the YM2612.
+You may attach a 7.67-7.68 MHz full-can crystal (or other signal source) to øM on the YM2612 and a 3.57-3.58 MHz full-can crystal (or other signal source) to the CLOCK pin on the SN67489. If you can not find crystals at this frequency, you can use LTC6903 SPI programmable oscillators.
 
 Teensy 3.5 | LTC6903 (clocking SN76489 @ ~3.57 MHz)
 ------------ | -------------
