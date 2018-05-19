@@ -1,3 +1,5 @@
+A new and improved version of this project can be found here: https://github.com/AidanHockey5/STM32_VGM_Player_YM2612_SN76489
+
 # Teensy 3.5 VGM Player Featuring YM2612 & SN76489
 A hardware Sega Genesis / Master system video game music player based on the Teensy 3.5
 
